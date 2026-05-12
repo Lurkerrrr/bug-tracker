@@ -7,6 +7,7 @@ import typeorm from './config/typeorm';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { TicketsModule } from './tickets/tickets.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -34,6 +35,7 @@ import { APP_GUARD } from '@nestjs/core';
     ]),
     AuthModule,
     UsersModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [

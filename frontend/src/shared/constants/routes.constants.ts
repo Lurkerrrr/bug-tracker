@@ -1,0 +1,7 @@
+export const ROUTES = {
+    LOGIN: '/login',
+    REGISTER: '/register',
+    BOARD: '/board',
+    TICKET: '/board/ticket/:id',
+    COMING_SOON: '/coming-soon',
+} as const;

@@ -1,0 +1,1 @@
+export type { UserRole, User } from '../../auth/types/auth.types';

@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import type { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -11,9 +12,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         private readonly authService: AuthService,
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            // Extract JWT from httpOnly cookie instead of Authorization header
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                (request: Request) => request?.cookies?.access_token ?? null,
+            ]),
             ignoreExpiration: false,
             secretOrKey: configService.get<string>('jwt.secret') as string,
+            passReqToCallback: false,
         });
     }
 

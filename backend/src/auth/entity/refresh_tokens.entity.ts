@@ -2,29 +2,23 @@ import {
   Entity,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity('refresh_tokens')
-export class RefreshTokens {
-  @PrimaryColumn({ type: 'uuid' })
+export class RefreshToken {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column('uuid', { name: 'user_id' })
   userId: string;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    name: 'created_at',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createdAt: Date;
+  @Column({ name: 'token_hash' })
+  tokenHash: string;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    name: 'updated_at',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  updatedAt: Date;
+  @Column({ type: 'timestamp', name: 'expires_at' })
+  expiresAt: Date;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }

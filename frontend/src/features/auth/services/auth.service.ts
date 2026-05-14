@@ -1,37 +1,36 @@
 import apiClient from '../../../api/api.client';
-import type { LoginDto, RegisterDto, AuthResponse } from '../types/auth.types';
+import type { LoginDto, RegisterDto } from '../types/auth.types';
+import type { User } from '../types/auth.types';
 
 export const authService = {
-    async login(dto: LoginDto): Promise<AuthResponse> {
-        const response = await apiClient.post<AuthResponse>('/auth/login', dto);
-        return response.data;
+    async login(dto: LoginDto): Promise<User> {
+        // Tokens are set as httpOnly cookies by the server automatically
+        const response = await apiClient.post<{ user: User }>('/auth/login', dto);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        return response.data.user;
     },
 
-    async register(dto: RegisterDto): Promise<AuthResponse> {
-        const response = await apiClient.post<AuthResponse>('/auth/register', dto);
-        return response.data;
+    async register(dto: RegisterDto): Promise<User> {
+        const response = await apiClient.post<{ user: User }>('/auth/register', dto);
+        return response.data.user;
     },
 
-    logout(): void {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('user');
+    async logout(): Promise<void> {
+        try {
+            // Tell server to invalidate refresh token and clear cookies
+            await apiClient.post('/auth/logout');
+        } finally {
+            localStorage.removeItem('user');
+        }
     },
 
-    getToken(): string | null {
-        return localStorage.getItem('access_token');
-    },
-
-    saveSession(data: AuthResponse): void {
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-    },
-
-    getCurrentUser() {
+    getCurrentUser(): User | null {
         const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     },
 
     isAuthenticated(): boolean {
-        return !!localStorage.getItem('access_token');
+        // httpOnly cookies are not readable by JS so we use localStorage user as indicator
+        return !!localStorage.getItem('user');
     },
 };

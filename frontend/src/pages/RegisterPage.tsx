@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../features/auth/services/auth.service';
-import { useAuth } from '../app/providers/AuthProvider';
 import { ROUTES } from '../shared/constants/routes.constants';
 import { UserRole } from '../features/auth/types/auth.types';
 import Input from '../shared/components/ui/Input';
@@ -9,7 +8,6 @@ import Button from '../shared/components/ui/Button';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
     const [form, setForm] = useState({
         username: '',
         email: '',
@@ -24,9 +22,8 @@ const RegisterPage = () => {
         setError('');
         setLoading(true);
         try {
-            const data = await authService.register(form);
-            login(data.user, data.access_token);
-            navigate(ROUTES.BOARD);
+            await authService.register(form);
+            navigate(ROUTES.LOGIN);
         } catch {
             setError('Registration failed. Username or email may already exist.');
         } finally {
@@ -104,7 +101,6 @@ const RegisterPage = () => {
                         >
                             <option value={UserRole.DEVELOPER}>Developer</option>
                             <option value={UserRole.TESTER}>Tester</option>
-                            <option value={UserRole.ADMIN}>Admin</option>
                         </select>
                     </div>
 

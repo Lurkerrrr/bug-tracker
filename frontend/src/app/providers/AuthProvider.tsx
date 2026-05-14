@@ -5,7 +5,7 @@ import { authService } from '../../features/auth/services/auth.service';
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
-    login: (user: User, token: string) => void;
+    login: (user: User) => void;
     logout: () => void;
 }
 
@@ -17,18 +17,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Restore session from localStorage on app load
     useEffect(() => {
         const savedUser = authService.getCurrentUser();
-        if (savedUser && authService.isAuthenticated()) {
+        if (savedUser) {
             setUser(savedUser);
         }
     }, []);
 
-    const login = (user: User, token: string) => {
-        authService.saveSession({ access_token: token, user });
+    const login = (user: User) => {
         setUser(user);
     };
 
-    const logout = () => {
-        authService.logout();
+    const logout = async () => {
+        await authService.logout();
         setUser(null);
     };
 
@@ -39,7 +38,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-// Custom hook for consuming auth context
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) throw new Error('useAuth must be used within AuthProvider');

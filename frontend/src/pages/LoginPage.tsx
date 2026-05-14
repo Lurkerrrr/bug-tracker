@@ -18,8 +18,8 @@ const LoginPage = () => {
         setError('');
         setLoading(true);
         try {
-            const data = await authService.login(form);
-            login(data.user, data.access_token);
+            const user = await authService.login(form);
+            login(user);
             navigate(ROUTES.BOARD);
         } catch {
             setError('Invalid username or password');

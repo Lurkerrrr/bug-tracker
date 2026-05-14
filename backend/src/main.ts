@@ -5,9 +5,11 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Reflector } from '@nestjs/core';
+const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') || 3000;

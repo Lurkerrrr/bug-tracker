@@ -23,8 +23,8 @@ const Sidebar = () => {
     const location = useLocation();
     const { user, logout } = useAuth();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate(ROUTES.LOGIN);
     };
 

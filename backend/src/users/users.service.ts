@@ -33,7 +33,7 @@ export class UsersService {
         if (existing) {
             throw new ConflictException('Username or email already exists');
         }
-        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const hashedPassword = await bcrypt.hash(dto.password, 12);
         const user = this.usersRepository.create({
             ...dto,
             password: hashedPassword,

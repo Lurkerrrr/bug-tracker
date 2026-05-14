@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsUUID, MinLength, IsInt, Min } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsUUID, MinLength, MaxLength, IsInt, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TicketType, TicketPriority } from '../entities/ticket.entity';
 
@@ -6,11 +6,13 @@ export class CreateTicketDto {
     @ApiProperty({ example: 'Login button not working' })
     @IsString()
     @MinLength(3)
+    @MaxLength(255)
     title: string;
 
     @ApiPropertyOptional({ example: 'Users cannot login on mobile' })
     @IsString()
     @IsOptional()
+    @MaxLength(10000)
     description?: string;
 
     @ApiPropertyOptional({ enum: TicketType, example: TicketType.BUG })
@@ -33,12 +35,14 @@ export class UpdateTicketDto {
     @ApiPropertyOptional({ example: 'Updated title' })
     @IsString()
     @MinLength(3)
+    @MaxLength(255)
     @IsOptional()
     title?: string;
 
     @ApiPropertyOptional({ example: 'Updated description' })
     @IsString()
     @IsOptional()
+    @MaxLength(10000)
     description?: string;
 
     @ApiPropertyOptional({ enum: TicketPriority, example: TicketPriority.HIGH })
@@ -55,11 +59,13 @@ export class UpdateTicketDto {
 export class TransitionTicketDto {
     @ApiProperty({ example: 'startProgress' })
     @IsString()
+    @MaxLength(50)
     action: string;
 
     @ApiProperty({ example: 'Starting work on this ticket' })
     @IsString()
     @MinLength(3)
+    @MaxLength(1000)
     comment: string;
 }
 

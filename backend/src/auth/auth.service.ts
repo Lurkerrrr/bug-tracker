@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/entity/user.entity';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -19,7 +20,7 @@ export class AuthService {
       username: dto.username,
       email: dto.email,
       password: dto.password,
-      role: dto.role,
+      role: UserRole.DEVELOPER,
     });
 
     this.logger.log(`REGISTER_SUCCESS | username=${user.username} | role=${user.role}`);

@@ -27,15 +27,11 @@ export class TicketsService {
         return this.ticketsRepository.save(ticket);
     }
 
+    // Password excluded automatically via @Exclude() on User entity + ClassSerializerInterceptor
     async findAll(): Promise<Ticket[]> {
-        const tickets = await this.ticketsRepository.find({
+        return this.ticketsRepository.find({
             relations: ['reporter', 'assignee'],
         });
-        tickets.forEach(ticket => {
-            if (ticket.reporter) delete (ticket.reporter as any).password;
-            if (ticket.assignee) delete (ticket.assignee as any).password;
-        });
-        return tickets;
     }
 
     async findOne(id: string): Promise<Ticket> {
@@ -45,12 +41,6 @@ export class TicketsService {
         });
         if (!ticket) {
             throw new NotFoundException(`Ticket #${id} not found`);
-        }
-        if (ticket.reporter) {
-            delete (ticket.reporter as any).password;
-        }
-        if (ticket.assignee) {
-            delete (ticket.assignee as any).password;
         }
         return ticket;
     }

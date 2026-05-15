@@ -3,25 +3,12 @@ import { CSS } from '@dnd-kit/utilities';
 import { TicketPriority, TicketType } from '../types/ticket.types';
 import type { Ticket } from '../types/ticket.types';
 import Badge from '../../../shared/components/ui/Badge';
+import { PRIORITY_VARIANT, TYPE_ICON } from '../constants/ticket.constants';
 
 interface TicketCardProps {
     ticket: Ticket;
     onClick: (ticket: Ticket) => void;
 }
-
-// Maps priority to badge variant
-const priorityVariant: Record<TicketPriority, 'danger' | 'warning' | 'success' | 'default'> = {
-    [TicketPriority.CRITICAL]: 'danger',
-    [TicketPriority.HIGH]: 'danger',
-    [TicketPriority.MEDIUM]: 'warning',
-    [TicketPriority.LOW]: 'success',
-};
-
-const typeIcon: Record<TicketType, string> = {
-    [TicketType.BUG]: '🐛',
-    [TicketType.TASK]: '✅',
-    [TicketType.EPIC]: '⚡',
-};
 
 const TicketCard = ({ ticket, onClick }: TicketCardProps) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -51,7 +38,7 @@ const TicketCard = ({ ticket, onClick }: TicketCardProps) => {
         >
             {/* Type */}
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span>{typeIcon[ticket.type]}</span>
+                <span>{TYPE_ICON[ticket.type]}</span>
                 <span>{ticket.type}</span>
             </div>
 
@@ -62,7 +49,7 @@ const TicketCard = ({ ticket, onClick }: TicketCardProps) => {
 
             {/* Footer */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Badge label={ticket.priority} variant={priorityVariant[ticket.priority]} />
+                <Badge label={ticket.priority} variant={PRIORITY_VARIANT[ticket.priority]} />
                 {ticket.assignee && (
                     <div style={{
                         width: 22, height: 22, borderRadius: '50%',

@@ -58,7 +58,7 @@ export class TicketsController {
     }
 
     @Patch(':id/log-time')
-    @Roles(UserRole.DEVELOPER)
+    @Roles(UserRole.ADMIN, UserRole.DEVELOPER)
     logTime(@Param('id') id: string, @Body() dto: LogTimeDto, @Request() req) {
         return this.ticketsService.logTime(id, dto, req.user);
     }

@@ -1,6 +1,7 @@
 import { IsString, IsEnum, IsOptional, IsUUID, MinLength, MaxLength, IsInt, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TicketType, TicketPriority } from '../entities/ticket.entity';
+import { TicketAction } from '../enums/ticket-action.enum';
 
 export class CreateTicketDto {
     @ApiProperty({ example: 'Login button not working' })
@@ -57,10 +58,9 @@ export class UpdateTicketDto {
 }
 
 export class TransitionTicketDto {
-    @ApiProperty({ example: 'startProgress' })
-    @IsString()
-    @MaxLength(50)
-    action: string;
+    @ApiProperty({ enum: TicketAction, example: TicketAction.START_PROGRESS })
+    @IsEnum(TicketAction)
+    action: TicketAction;
 
     @ApiProperty({ example: 'Starting work on this ticket' })
     @IsString()

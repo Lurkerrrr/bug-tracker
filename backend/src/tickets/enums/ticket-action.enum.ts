@@ -1,0 +1,15 @@
+export enum TicketAction {
+    START_PROGRESS = 'startProgress',
+    SEND_TO_CODE_REVIEW = 'sendToCodeReview',
+    APPROVE_CODE_REVIEW = 'approveCodeReview',
+    START_TESTING = 'startTesting',
+    PASS_TESTING = 'passTesting',
+    FAIL_TESTING = 'failTesting',
+    ACCEPT_BUSINESS = 'acceptBusiness',
+    ARCHIVE = 'archive',
+    BLOCK = 'block',
+    UNBLOCK = 'unblock',
+    REJECT = 'reject',
+    REOPEN = 'reopen',
+    MOVE_TO_BACKLOG = 'moveToBacklog',
+}

@@ -44,8 +44,8 @@ export class TicketsController {
 
     @Put(':id')
     @Roles(UserRole.ADMIN, UserRole.DEVELOPER, UserRole.TESTER)
-    update(@Param('id') id: string, @Body() dto: UpdateTicketDto) {
-        return this.ticketsService.update(id, dto);
+    update(@Param('id') id: string, @Body() dto: UpdateTicketDto, @Request() req) {
+        return this.ticketsService.update(id, dto, req.user);
     }
 
     @Patch(':id/transition')
@@ -59,8 +59,8 @@ export class TicketsController {
 
     @Patch(':id/log-time')
     @Roles(UserRole.DEVELOPER)
-    logTime(@Param('id') id: string, @Body() dto: LogTimeDto) {
-        return this.ticketsService.logTime(id, dto);
+    logTime(@Param('id') id: string, @Body() dto: LogTimeDto, @Request() req) {
+        return this.ticketsService.logTime(id, dto, req.user);
     }
 
     @Patch(':id/assign-to-me')

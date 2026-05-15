@@ -4,25 +4,13 @@ import type { Ticket } from '../types/ticket.types';
 import { ticketsService } from '../services/tickets.service';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
+import { PRIORITY_VARIANT, TYPE_ICON } from '../constants/ticket.constants';
 
 interface TicketDetailProps {
     ticket: Ticket;
     onClose: () => void;
     onUpdated: (ticket: Ticket) => void;
 }
-
-const priorityVariant: Record<TicketPriority, 'danger' | 'warning' | 'success' | 'default'> = {
-    [TicketPriority.CRITICAL]: 'danger',
-    [TicketPriority.HIGH]: 'danger',
-    [TicketPriority.MEDIUM]: 'warning',
-    [TicketPriority.LOW]: 'success',
-};
-
-const typeIcon: Record<TicketType, string> = {
-    [TicketType.BUG]: '🐛',
-    [TicketType.TASK]: '✅',
-    [TicketType.EPIC]: '⚡',
-};
 
 const TicketDetail = ({ ticket, onClose, onUpdated }: TicketDetailProps) => {
     const [comment, setComment] = useState('');
@@ -248,14 +236,14 @@ const TicketDetail = ({ ticket, onClose, onUpdated }: TicketDetailProps) => {
                         <div style={{ marginBottom: 12 }}>
                             <div style={fieldLabel}>Priority</div>
                             <div style={fieldValue}>
-                                <Badge label={ticket.priority} variant={priorityVariant[ticket.priority]} />
+                                <Badge label={ticket.priority} variant={PRIORITY_VARIANT[ticket.priority]} />
                             </div>
                         </div>
 
                         <div style={{ marginBottom: 12 }}>
                             <div style={fieldLabel}>Type</div>
                             <div style={fieldValue}>
-                                {typeIcon[ticket.type]} {ticket.type}
+                                {TYPE_ICON[ticket.type]} {ticket.type}
                             </div>
                         </div>
 

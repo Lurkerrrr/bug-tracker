@@ -1,15 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, VersioningType, ClassSerializerInterceptor } from '@nestjs/common';
+import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Reflector } from '@nestjs/core';
+import * as express from 'express';
+
 const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  app.use(express.json({ limit: '50kb' }));
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') || 3000;

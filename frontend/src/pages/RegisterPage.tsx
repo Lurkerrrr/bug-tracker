@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../features/auth/services/auth.service';
 import { ROUTES } from '../shared/constants/routes.constants';
-import { UserRole } from '../features/auth/types/auth.types';
 import Input from '../shared/components/ui/Input';
 import Button from '../shared/components/ui/Button';
 
@@ -12,7 +11,6 @@ const RegisterPage = () => {
         username: '',
         email: '',
         password: '',
-        role: UserRole.DEVELOPER,
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -91,18 +89,6 @@ const RegisterPage = () => {
                         placeholder="Min. 8 characters"
                         minLength={8}
                     />
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Role</label>
-                        <select
-                            value={form.role}
-                            onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
-                            style={{ height: 36, padding: '0 10px', borderRadius: 4 }}
-                        >
-                            <option value={UserRole.DEVELOPER}>Developer</option>
-                            <option value={UserRole.TESTER}>Tester</option>
-                        </select>
-                    </div>
 
                     {error && (
                         <div style={{ fontSize: 13, color: 'var(--danger)', background: 'var(--danger-bg)', padding: '8px 12px', borderRadius: 4 }}>

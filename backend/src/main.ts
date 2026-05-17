@@ -15,7 +15,7 @@ async function bootstrap() {
   app.use(express.json({ limit: '50kb' }));
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('port') || 3000;
+  const port = configService.get<number>('app.port') || 3000;
 
   // Security headers with explicit Content Security Policy
   app.use(

@@ -9,12 +9,14 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [general, typeorm],
+      validate,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

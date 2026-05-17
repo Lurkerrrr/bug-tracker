@@ -24,10 +24,6 @@ export abstract class BaseTicketState implements ITicketState {
         return this.illegalTransition('Ready for QA');
     }
 
-    sendToQA(_context: TicketContext): ITicketState {
-        return this.illegalTransition('Ready for QA');
-    }
-
     startTesting(_context: TicketContext): ITicketState {
         return this.illegalTransition('In Test');
     }

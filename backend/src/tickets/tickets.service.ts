@@ -79,18 +79,22 @@ export class TicketsService {
         const ticket = await this.findOne(id);
         this.assertOwnerOrAdmin(ticket, user, 'update');
         Object.assign(ticket, dto);
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: user.id,
-            userUsername: user.username,
-            eventType: TicketEventType.UPDATED,
-            fromStatus: null,
-            toStatus: null,
-            comment: null,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.UPDATED,
+                fromStatus: null,
+                toStatus: null,
+                comment: null,
+            }));
         });
-        return saved;
+
+        return this.findOne(id);
     }
 
     async transition(

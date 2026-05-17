@@ -27,7 +27,7 @@ export class TicketsController {
     constructor(private readonly ticketsService: TicketsService) { }
 
     @Post()
-    @Roles(UserRole.ADMIN, UserRole.TESTER)
+    @Roles(UserRole.ADMIN, UserRole.DEVELOPER, UserRole.TESTER)
     create(@Body() dto: CreateTicketDto, @Request() req) {
         return this.ticketsService.create(dto, req.user);
     }

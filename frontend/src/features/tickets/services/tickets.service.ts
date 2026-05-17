@@ -1,6 +1,7 @@
 import apiClient from '../../../api/api.client';
 import type {
     Ticket,
+    TicketEvent,
     CreateTicketDto,
     UpdateTicketDto,
     TransitionTicketDto,
@@ -16,6 +17,11 @@ export const ticketsService = {
 
     async getById(id: string): Promise<Ticket> {
         const response = await apiClient.get<Ticket>(`/tickets/${id}`);
+        return response.data;
+    },
+
+    async getEvents(id: string): Promise<TicketEvent[]> {
+        const response = await apiClient.get<TicketEvent[]>(`/tickets/${id}/events`);
         return response.data;
     },
 

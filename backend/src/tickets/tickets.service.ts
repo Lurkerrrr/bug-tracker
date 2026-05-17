@@ -32,18 +32,22 @@ export class TicketsService {
             reporterId: reporter.id,
             status: TicketStatus.TO_DO,
         });
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: reporter.id,
-            userUsername: reporter.username,
-            eventType: TicketEventType.CREATED,
-            fromStatus: null,
-            toStatus: TicketStatus.TO_DO,
-            comment: null,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: reporter.id,
+                userUsername: reporter.username,
+                eventType: TicketEventType.CREATED,
+                fromStatus: null,
+                toStatus: TicketStatus.TO_DO,
+                comment: null,
+            }));
         });
-        return saved;
+
+        return this.findOne(ticket.id);
     }
 
     // Password excluded automatically via @Exclude() on User entity + ClassSerializerInterceptor
@@ -75,18 +79,22 @@ export class TicketsService {
         const ticket = await this.findOne(id);
         this.assertOwnerOrAdmin(ticket, user, 'update');
         Object.assign(ticket, dto);
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: user.id,
-            userUsername: user.username,
-            eventType: TicketEventType.UPDATED,
-            fromStatus: null,
-            toStatus: null,
-            comment: null,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.UPDATED,
+                fromStatus: null,
+                toStatus: null,
+                comment: null,
+            }));
         });
-        return saved;
+
+        return this.findOne(id);
     }
 
     async transition(
@@ -146,35 +154,43 @@ export class TicketsService {
         const ticket = await this.findOne(id);
         this.assertAssigneeOrAdmin(ticket, user, 'log time on');
         ticket.timeLogged += dto.minutes;
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: user.id,
-            userUsername: user.username,
-            eventType: TicketEventType.TIME_LOGGED,
-            fromStatus: null,
-            toStatus: null,
-            comment: `Logged ${dto.minutes} minutes`,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.TIME_LOGGED,
+                fromStatus: null,
+                toStatus: null,
+                comment: `Logged ${dto.minutes} minutes`,
+            }));
         });
-        return saved;
+
+        return this.findOne(id);
     }
 
     async assignToMe(id: string, user: User): Promise<Ticket> {
         const ticket = await this.findOne(id);
         ticket.assigneeId = user.id;
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: user.id,
-            userUsername: user.username,
-            eventType: TicketEventType.ASSIGNED,
-            fromStatus: null,
-            toStatus: null,
-            comment: null,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.ASSIGNED,
+                fromStatus: null,
+                toStatus: null,
+                comment: null,
+            }));
         });
-        return saved;
+
+        return this.findOne(id);
     }
 
     async delete(id: string, reason: string, user: User): Promise<void> {
@@ -223,6 +239,20 @@ export class TicketsService {
                 `You do not have permission to ${action} this ticket`,
             );
         }
+    }
+
+    // Builds an event entity in memory for use inside transactions
+    private buildEvent(data: {
+        ticketId: string;
+        ticketTitle: string;
+        userId: string;
+        userUsername: string;
+        eventType: TicketEventType;
+        fromStatus: TicketStatus | null;
+        toStatus: TicketStatus | null;
+        comment: string | null;
+    }): TicketEvent {
+        return this.ticketEventsRepository.create(data);
     }
 
     // DRY helper — writes a single event row

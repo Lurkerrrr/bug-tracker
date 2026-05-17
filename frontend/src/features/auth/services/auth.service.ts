@@ -29,14 +29,4 @@ export const authService = {
             localStorage.removeItem('user');
         }
     },
-
-    getCurrentUser(): User | null {
-        const user = localStorage.getItem('user');
-        return user ? JSON.parse(user) : null;
-    },
-
-    isAuthenticated(): boolean {
-        // httpOnly cookies are not readable by JS so we use localStorage user as indicator
-        return !!localStorage.getItem('user');
-    },
 };

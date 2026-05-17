@@ -124,3 +124,25 @@ export const TICKET_TRANSITIONS: Record<TicketStatus, { action: string; label: s
         { action: 'block', label: 'Block / On Hold' },
     ],
 };
+
+export enum TicketEventType {
+    CREATED = 'CREATED',
+    TRANSITIONED = 'TRANSITIONED',
+    UPDATED = 'UPDATED',
+    ASSIGNED = 'ASSIGNED',
+    TIME_LOGGED = 'TIME_LOGGED',
+    DELETED = 'DELETED',
+}
+
+export interface TicketEvent {
+    id: string;
+    ticketId: string;
+    ticketTitle: string;
+    userId: string;
+    userUsername: string;
+    eventType: TicketEventType;
+    fromStatus: string | null;
+    toStatus: string | null;
+    comment: string | null;
+    createdAt: string;
+}

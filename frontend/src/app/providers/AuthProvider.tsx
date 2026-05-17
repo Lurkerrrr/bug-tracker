@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         authService.me()
             .then((user) => setUser(user))
             .catch(() => {
-                localStorage.removeItem('user');
                 setUser(null);
             })
             .finally(() => setLoading(false));

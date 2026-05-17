@@ -33,7 +33,6 @@ apiClient.interceptors.response.use(
             } catch {
                 // Refresh failed, so we will have a clear user data and redirect to login
                 refreshPromise = null;
-                localStorage.removeItem('user');
                 window.location.href = '/login';
             }
         }

@@ -11,7 +11,6 @@ export interface ITicketState {
     startProgress(context: TicketContext): ITicketState;
     sendToCodeReview(context: TicketContext): ITicketState;
     approveCodeReview(context: TicketContext): ITicketState;
-    sendToQA(context: TicketContext): ITicketState;
     startTesting(context: TicketContext): ITicketState;
     passTesting(context: TicketContext): ITicketState;
     failTesting(context: TicketContext): ITicketState;

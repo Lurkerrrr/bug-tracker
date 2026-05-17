@@ -1,5 +1,6 @@
 import { TicketStatus } from '../enums/ticket-status.enum';
 import { ITicketState } from './ticket-state.interface';
+import { BadRequestException } from '@nestjs/common';
 import {
     ToDoState,
     InProgressState,
@@ -40,7 +41,7 @@ export class TicketStateFactory {
             case TicketStatus.REOPENED:
                 return new ReopenedState();
             default:
-                return new ToDoState();
+                throw new BadRequestException(`Unknown ticket status: "${status}"`);
         }
     }
 }

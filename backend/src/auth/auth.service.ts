@@ -119,7 +119,7 @@ export class AuthService {
     const rawToken = crypto.randomBytes(64).toString('hex');
     const tokenHash = this.hashToken(rawToken);
 
-    const expirationDays = this.configService.get<string>('jwt.expirationExchange') || '7d';
+    const expirationDays = this.configService.get<string>('app.jwt.expirationExchange') || '7d';
     const days = parseInt(expirationDays.replace('d', ''), 10) || 7;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + days);

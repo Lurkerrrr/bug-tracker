@@ -1,11 +1,25 @@
-export default (): any => {
+import { registerAs } from '@nestjs/config';
+import { EnvConfig } from './env.validation';
+
+export interface AppConfig {
+  environment: string;
+  port: number;
+  jwt: {
+    secret: string;
+    expiration: string;
+    expirationExchange: string;
+  };
+}
+
+export default registerAs('app', (): AppConfig => {
+  const env = process.env as unknown as EnvConfig;
   return {
-    enviroment: `${process.env.ENV}`,
-    port: parseInt(`${process.env.PORT}`, 10),
+    environment: env.ENV,
+    port: Number(env.PORT),
     jwt: {
-      secret: `${process.env.JWT_TOKEN}`,
-      expiration: `${process.env.JWT_EXPIRATION}`,
-      expirationExchange: `${process.env.JWT_EXPIRATION_EXCHANGE}`,
+      secret: env.JWT_TOKEN,
+      expiration: env.JWT_EXPIRATION,
+      expirationExchange: env.JWT_EXPIRATION_EXCHANGE,
     },
   };
-};
+});

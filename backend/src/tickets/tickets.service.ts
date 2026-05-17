@@ -175,18 +175,22 @@ export class TicketsService {
     async assignToMe(id: string, user: User): Promise<Ticket> {
         const ticket = await this.findOne(id);
         ticket.assigneeId = user.id;
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: user.id,
-            userUsername: user.username,
-            eventType: TicketEventType.ASSIGNED,
-            fromStatus: null,
-            toStatus: null,
-            comment: null,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.ASSIGNED,
+                fromStatus: null,
+                toStatus: null,
+                comment: null,
+            }));
         });
-        return saved;
+
+        return this.findOne(id);
     }
 
     async delete(id: string, reason: string, user: User): Promise<void> {

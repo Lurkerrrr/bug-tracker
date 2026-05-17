@@ -10,19 +10,29 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
+// Shared refresh promise, prevents concurrent 401s from firing multiple refresh calls
+let refreshPromise: Promise<void> | null = null;
+
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // If access token expired, try to refresh once automatically
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
+
             try {
-                await apiClient.post('/auth/refresh');
+                // If a refresh is already in flight, wait for it instead of firing a new one
+                if (!refreshPromise) {
+                    refreshPromise = apiClient.post('/auth/refresh').then(() => {
+                        refreshPromise = null;
+                    });
+                }
+                await refreshPromise;
                 return apiClient(originalRequest);
             } catch {
-                // Refresh failed — clear user data and redirect to login
+                // Refresh failed, so we will have a clear user data and redirect to login
+                refreshPromise = null;
                 localStorage.removeItem('user');
                 window.location.href = '/login';
             }

@@ -5,6 +5,7 @@ import type {
     UpdateTicketDto,
     TransitionTicketDto,
     LogTimeDto,
+    DeleteTicketDto,
 } from '../types/ticket.types';
 
 export const ticketsService = {
@@ -49,5 +50,9 @@ export const ticketsService = {
             `/tickets/${id}/assign-to-me`
         );
         return response.data;
+    },
+
+    async deleteTicket(id: string, dto: DeleteTicketDto): Promise<void> {
+        await apiClient.delete(`/tickets/${id}`, { data: dto });
     },
 };

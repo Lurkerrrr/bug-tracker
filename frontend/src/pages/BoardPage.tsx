@@ -42,6 +42,11 @@ const BoardPage = () => {
         setSelectedTicket(updated);
     };
 
+    const handleTicketDeleted = (id: string) => {
+        setTickets((prev) => prev.filter((t) => t.id !== id));
+        setSelectedTicket(null);
+    };
+
     // Filter tickets by search query
     const filteredTickets = tickets.filter((t) =>
         !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -96,6 +101,7 @@ const BoardPage = () => {
                         ticket={selectedTicket}
                         onClose={() => setSelectedTicket(null)}
                         onUpdated={handleTicketUpdated}
+                        onDeleted={handleTicketDeleted}
                     />
                 )}
             </Modal>

@@ -74,6 +74,10 @@ export interface LogTimeDto {
     minutes: number;
 }
 
+export interface DeleteTicketDto {
+    reason: string;
+}
+
 export const TICKET_TRANSITIONS: Record<TicketStatus, { action: string; label: string }[]> = {
     [TicketStatus.TO_DO]: [
         { action: 'startProgress', label: 'Start Progress' },

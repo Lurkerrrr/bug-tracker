@@ -44,6 +44,7 @@ const TicketPage = () => {
                     ticket={ticket}
                     onClose={() => navigate(ROUTES.BOARD)}
                     onUpdated={setTicket}
+                    onDeleted={() => navigate(ROUTES.BOARD)}
                 />
             )}
         </AppLayout>

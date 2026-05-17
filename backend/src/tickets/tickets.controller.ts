@@ -19,6 +19,7 @@ import {
     TransitionTicketDto,
     LogTimeDto,
     DeleteTicketDto,
+    TicketEventResponseDto,
 } from './dto/ticket.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -44,6 +45,11 @@ export class TicketsController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.ticketsService.findOne(id);
+    }
+
+    @Get(':id/events')
+    findEvents(@Param('id') id: string): Promise<TicketEventResponseDto[]> {
+        return this.ticketsService.findEvents(id);
     }
 
     @Put(':id')

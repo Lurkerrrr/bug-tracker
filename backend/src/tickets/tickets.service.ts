@@ -1,13 +1,13 @@
 import {
     Injectable,
     NotFoundException,
-    BadRequestException,
     ForbiddenException,
     Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Ticket } from './entities/ticket.entity';
+import { TicketEvent, TicketEventType } from './entities/ticket-event.entity';
 import { CreateTicketDto, UpdateTicketDto, TransitionTicketDto, LogTimeDto } from './dto/ticket.dto';
 import { TicketStateFactory } from './states/ticket-state.factory';
 import { TicketStatus } from './enums/ticket-status.enum';
@@ -16,9 +16,14 @@ import { User, UserRole } from '../users/entity/user.entity';
 
 @Injectable()
 export class TicketsService {
+    private readonly logger = new Logger(TicketsService.name);
+
     constructor(
         @InjectRepository(Ticket)
         private readonly ticketsRepository: Repository<Ticket>,
+        @InjectRepository(TicketEvent)
+        private readonly ticketEventsRepository: Repository<TicketEvent>,
+        private readonly dataSource: DataSource,
     ) { }
 
     async create(dto: CreateTicketDto, reporter: User): Promise<Ticket> {
@@ -27,7 +32,18 @@ export class TicketsService {
             reporterId: reporter.id,
             status: TicketStatus.TO_DO,
         });
-        return this.ticketsRepository.save(ticket);
+        const saved = await this.ticketsRepository.save(ticket);
+        await this.recordEvent({
+            ticketId: saved.id,
+            ticketTitle: saved.title,
+            userId: reporter.id,
+            userUsername: reporter.username,
+            eventType: TicketEventType.CREATED,
+            fromStatus: null,
+            toStatus: TicketStatus.TO_DO,
+            comment: null,
+        });
+        return saved;
     }
 
     // Password excluded automatically via @Exclude() on User entity + ClassSerializerInterceptor
@@ -48,22 +64,29 @@ export class TicketsService {
         return ticket;
     }
 
+    async findEvents(ticketId: string): Promise<TicketEvent[]> {
+        return this.ticketEventsRepository.find({
+            where: { ticketId },
+            order: { createdAt: 'ASC' },
+        });
+    }
+
     async update(id: string, dto: UpdateTicketDto, user: User): Promise<Ticket> {
         const ticket = await this.findOne(id);
         this.assertOwnerOrAdmin(ticket, user, 'update');
         Object.assign(ticket, dto);
-        return this.ticketsRepository.save(ticket);
-    }
-
-    private readonly logger = new Logger(TicketsService.name);
-
-    async delete(id: string, reason: string, user: User): Promise<void> {
-        const ticket = await this.findOne(id);
-        this.assertOwnerOrAdmin(ticket, user, 'delete');
-        this.logger.log(
-            `Ticket #${id} deleted by user ${user.id} (${user.role}). Reason: ${reason}`,
-        );
-        await this.ticketsRepository.delete(id);
+        const saved = await this.ticketsRepository.save(ticket);
+        await this.recordEvent({
+            ticketId: saved.id,
+            ticketTitle: saved.title,
+            userId: user.id,
+            userUsername: user.username,
+            eventType: TicketEventType.UPDATED,
+            fromStatus: null,
+            toStatus: null,
+            comment: null,
+        });
+        return saved;
     }
 
     async transition(
@@ -75,12 +98,12 @@ export class TicketsService {
         this.assertOwnerOrAdmin(ticket, user, 'transition');
 
         const currentState = TicketStateFactory.create(ticket.status);
+        const fromStatus = ticket.status;
         const context = {
             status: ticket.status,
             assigneeId: ticket.assigneeId,
         };
 
-        // Use TicketAction enum values to invoke state machine methods
         const actionMethodMap: Record<TicketAction, () => any> = {
             [TicketAction.START_PROGRESS]: () => currentState.startProgress(context),
             [TicketAction.SEND_TO_CODE_REVIEW]: () => currentState.sendToCodeReview(context),
@@ -98,22 +121,83 @@ export class TicketsService {
         };
 
         const newState = actionMethodMap[dto.action]();
-        ticket.status = newState.getStatus();
-        ticket.statusComment = dto.comment;
-        return this.ticketsRepository.save(ticket);
+        const toStatus = newState.getStatus();
+
+        await this.dataSource.transaction(async (manager) => {
+            ticket.status = toStatus;
+            ticket.statusComment = dto.comment;
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.ticketEventsRepository.create({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.TRANSITIONED,
+                fromStatus,
+                toStatus,
+                comment: dto.comment,
+            }));
+        });
+
+        return this.findOne(id);
     }
 
     async logTime(id: string, dto: LogTimeDto, user: User): Promise<Ticket> {
         const ticket = await this.findOne(id);
         this.assertAssigneeOrAdmin(ticket, user, 'log time on');
         ticket.timeLogged += dto.minutes;
-        return this.ticketsRepository.save(ticket);
+        const saved = await this.ticketsRepository.save(ticket);
+        await this.recordEvent({
+            ticketId: saved.id,
+            ticketTitle: saved.title,
+            userId: user.id,
+            userUsername: user.username,
+            eventType: TicketEventType.TIME_LOGGED,
+            fromStatus: null,
+            toStatus: null,
+            comment: `Logged ${dto.minutes} minutes`,
+        });
+        return saved;
     }
 
     async assignToMe(id: string, user: User): Promise<Ticket> {
         const ticket = await this.findOne(id);
         ticket.assigneeId = user.id;
-        return this.ticketsRepository.save(ticket);
+        const saved = await this.ticketsRepository.save(ticket);
+        await this.recordEvent({
+            ticketId: saved.id,
+            ticketTitle: saved.title,
+            userId: user.id,
+            userUsername: user.username,
+            eventType: TicketEventType.ASSIGNED,
+            fromStatus: null,
+            toStatus: null,
+            comment: null,
+        });
+        return saved;
+    }
+
+    async delete(id: string, reason: string, user: User): Promise<void> {
+        const ticket = await this.findOne(id);
+        this.assertOwnerOrAdmin(ticket, user, 'delete');
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(TicketEvent, this.ticketEventsRepository.create({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: user.id,
+                userUsername: user.username,
+                eventType: TicketEventType.DELETED,
+                fromStatus: ticket.status,
+                toStatus: null,
+                comment: reason,
+            }));
+            await manager.delete(Ticket, id);
+        });
+
+        this.logger.log(
+            `Ticket #${id} deleted by user ${user.id} (${user.role}). Reason: ${reason}`,
+        );
     }
 
     // Reporter, assignee, or ADMIN can update/transition a ticket
@@ -139,5 +223,20 @@ export class TicketsService {
                 `You do not have permission to ${action} this ticket`,
             );
         }
+    }
+
+    // DRY helper — writes a single event row
+    private async recordEvent(data: {
+        ticketId: string;
+        ticketTitle: string;
+        userId: string;
+        userUsername: string;
+        eventType: TicketEventType;
+        fromStatus: TicketStatus | null;
+        toStatus: TicketStatus | null;
+        comment: string | null;
+    }): Promise<void> {
+        const event = this.ticketEventsRepository.create(data);
+        await this.ticketEventsRepository.save(event);
     }
 }

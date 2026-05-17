@@ -13,7 +13,7 @@ const config = {
   database: `${process.env.DATABASE_NAME}`,
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
-  synchronize: true,
+  synchronize: process.env.ENV === 'development',
 };
 
 export default registerAs('typeorm', () => config);

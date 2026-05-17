@@ -20,7 +20,7 @@ import { Request as RequestDecorator } from '@nestjs/common';
 
 const COOKIE_OPTIONS = {
     httpOnly: true,      // JS cannot access these cookies
-    secure: false,       // Set to true in production with HTTPS
+    secure: process.env.ENV !== 'development',
     sameSite: 'lax' as const,
     path: '/',
 };

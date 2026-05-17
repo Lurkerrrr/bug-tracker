@@ -32,18 +32,22 @@ export class TicketsService {
             reporterId: reporter.id,
             status: TicketStatus.TO_DO,
         });
-        const saved = await this.ticketsRepository.save(ticket);
-        await this.recordEvent({
-            ticketId: saved.id,
-            ticketTitle: saved.title,
-            userId: reporter.id,
-            userUsername: reporter.username,
-            eventType: TicketEventType.CREATED,
-            fromStatus: null,
-            toStatus: TicketStatus.TO_DO,
-            comment: null,
+
+        await this.dataSource.transaction(async (manager) => {
+            await manager.save(Ticket, ticket);
+            await manager.save(TicketEvent, this.buildEvent({
+                ticketId: ticket.id,
+                ticketTitle: ticket.title,
+                userId: reporter.id,
+                userUsername: reporter.username,
+                eventType: TicketEventType.CREATED,
+                fromStatus: null,
+                toStatus: TicketStatus.TO_DO,
+                comment: null,
+            }));
         });
-        return saved;
+
+        return this.findOne(ticket.id);
     }
 
     // Password excluded automatically via @Exclude() on User entity + ClassSerializerInterceptor
@@ -223,6 +227,20 @@ export class TicketsService {
                 `You do not have permission to ${action} this ticket`,
             );
         }
+    }
+
+    // Builds an event entity in memory for use inside transactions
+    private buildEvent(data: {
+        ticketId: string;
+        ticketTitle: string;
+        userId: string;
+        userUsername: string;
+        eventType: TicketEventType;
+        fromStatus: TicketStatus | null;
+        toStatus: TicketStatus | null;
+        comment: string | null;
+    }): TicketEvent {
+        return this.ticketEventsRepository.create(data);
     }
 
     // DRY helper — writes a single event row

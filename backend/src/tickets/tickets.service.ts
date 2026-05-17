@@ -3,6 +3,7 @@ import {
     NotFoundException,
     BadRequestException,
     ForbiddenException,
+    Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -52,6 +53,17 @@ export class TicketsService {
         this.assertOwnerOrAdmin(ticket, user, 'update');
         Object.assign(ticket, dto);
         return this.ticketsRepository.save(ticket);
+    }
+
+    private readonly logger = new Logger(TicketsService.name);
+
+    async delete(id: string, reason: string, user: User): Promise<void> {
+        const ticket = await this.findOne(id);
+        this.assertOwnerOrAdmin(ticket, user, 'delete');
+        this.logger.log(
+            `Ticket #${id} deleted by user ${user.id} (${user.role}). Reason: ${reason}`,
+        );
+        await this.ticketsRepository.delete(id);
     }
 
     async transition(

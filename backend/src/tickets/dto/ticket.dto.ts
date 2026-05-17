@@ -75,3 +75,11 @@ export class LogTimeDto {
     @Min(1)
     minutes: number;
 }
+
+export class DeleteTicketDto {
+    @ApiProperty({ example: 'Duplicate of ticket #123' })
+    @IsString()
+    @MinLength(3)
+    @MaxLength(1000)
+    reason: string;
+}

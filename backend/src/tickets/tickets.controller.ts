@@ -4,6 +4,9 @@ import {
     Post,
     Put,
     Patch,
+    Delete,
+    HttpCode,
+    HttpStatus,
     Body,
     Param,
     UseGuards,
@@ -15,6 +18,7 @@ import {
     UpdateTicketDto,
     TransitionTicketDto,
     LogTimeDto,
+    DeleteTicketDto,
 } from './dto/ticket.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -67,5 +71,12 @@ export class TicketsController {
     @Roles(UserRole.DEVELOPER)
     assignToMe(@Param('id') id: string, @Request() req) {
         return this.ticketsService.assignToMe(id, req.user);
+    }
+
+    @Delete(':id')
+    @Roles(UserRole.ADMIN, UserRole.DEVELOPER, UserRole.TESTER)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    remove(@Param('id') id: string, @Body() dto: DeleteTicketDto, @Request() req) {
+        return this.ticketsService.delete(id, dto.reason, req.user);
     }
 }

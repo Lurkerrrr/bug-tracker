@@ -13,13 +13,17 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    // Restore session from localStorage on app load
+    // Verify session with backend on every app load
     useEffect(() => {
-        const savedUser = authService.getCurrentUser();
-        if (savedUser) {
-            setUser(savedUser);
-        }
+        authService.me()
+            .then((user) => setUser(user))
+            .catch(() => {
+                localStorage.removeItem('user');
+                setUser(null);
+            })
+            .finally(() => setLoading(false));
     }, []);
 
     const login = (user: User) => {
@@ -30,6 +34,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await authService.logout();
         setUser(null);
     };
+
+    // Prevent ProtectedRoute from redirecting before session is verified
+    if (loading) return null;
 
     return (
         <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>

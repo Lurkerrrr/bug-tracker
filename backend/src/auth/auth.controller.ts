@@ -1,11 +1,13 @@
 import {
     Controller,
     Post,
+    Get,
     Body,
     HttpCode,
     HttpStatus,
     Res,
     Req,
+    UseGuards,
     UnauthorizedException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
@@ -13,6 +15,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Request as RequestDecorator } from '@nestjs/common';
 
 const COOKIE_OPTIONS = {
     httpOnly: true,      // JS cannot access these cookies
@@ -30,6 +34,7 @@ export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Post('register')
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @ApiOperation({ summary: 'Register a new user (always gets DEVELOPER role)' })
     async register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
@@ -60,6 +65,7 @@ export class AuthController {
 
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { ttl: 60000, limit: 10 } })
     @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
     async refresh(
         @Req() req: Request,
@@ -102,5 +108,12 @@ export class AuthController {
         res.clearCookie('refresh_token', { path: '/' });
 
         return { message: 'Logged out successfully' };
+    }
+
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Get current authenticated user' })
+    me(@RequestDecorator() req) {
+        return { user: req.user };
     }
 }

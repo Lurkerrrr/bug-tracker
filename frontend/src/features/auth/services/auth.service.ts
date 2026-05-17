@@ -10,6 +10,12 @@ export const authService = {
         return response.data.user;
     },
 
+    async me(): Promise<User> {
+        const response = await apiClient.get<{ user: User }>('/auth/me');
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        return response.data.user;
+    },
+
     async register(dto: RegisterDto): Promise<User> {
         const response = await apiClient.post<{ user: User }>('/auth/register', dto);
         return response.data.user;

@@ -18,6 +18,8 @@ export const BOARD_COLUMNS: TicketStatus[] = [
     TicketStatus.READY_FOR_QA,
     TicketStatus.IN_TEST,
     TicketStatus.DONE,
+    TicketStatus.BLOCKED_ON_HOLD,
+    TicketStatus.REOPENED,
 ];
 
 const KanbanColumn = ({ status, tickets, onTicketClick }: KanbanColumnProps) => {

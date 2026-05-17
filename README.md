@@ -133,7 +133,7 @@ src/
 | Update ticket | ✅ | ✅ | ✅ |
 | Transition status | ✅ | ✅ | ✅ |
 | Log time | ✅ | ✅ | ❌ |
-| Assign to me | ✅ | ✅ | ❌ |
+| Assign to me | ❌ | ✅ | ❌ |
 | Delete ticket | ✅ | ✅ | ✅ |
 
 ---
@@ -144,10 +144,10 @@ Implemented using the **State Design Pattern**. Each of the 11 states is a dedic
 
 ```
 To Do → In Progress → Code Review → Ready for QA → In Test → Done → Closed → Closed Out
-           ↓               ↓                                    ↓       ↓
-        Rejected      In Progress                           Reopened  Reopened
-           ↓               
-      Blocked/On Hold ←──────────────────────── (from any active state)
+           ↓                                            ↓       ↓
+        Rejected                                    Reopened  Reopened
+                                                        
+Blocked/On Hold ←──────────────────────── (from any active state)
            ↓
        In Progress / To Do
 ```

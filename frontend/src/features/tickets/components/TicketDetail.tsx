@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import type { Ticket } from '../types/ticket.types';
+import { useState, useEffect, useCallback } from 'react';
+import type { Ticket, TicketEvent } from '../types/ticket.types';
+import { TicketEventType } from '../types/ticket.types';
 import { ticketsService } from '../services/tickets.service';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
@@ -14,16 +15,55 @@ interface TicketDetailProps {
     onDeleted: (id: string) => void;
 }
 
+const EVENT_ICON: Record<TicketEventType, string> = {
+    [TicketEventType.CREATED]: '✨',
+    [TicketEventType.TRANSITIONED]: '🔄',
+    [TicketEventType.UPDATED]: '✏️',
+    [TicketEventType.ASSIGNED]: '👤',
+    [TicketEventType.TIME_LOGGED]: '⏱️',
+    [TicketEventType.DELETED]: '🗑️',
+};
+
+const EVENT_LABEL: Record<TicketEventType, string> = {
+    [TicketEventType.CREATED]: 'created this ticket',
+    [TicketEventType.TRANSITIONED]: 'changed status',
+    [TicketEventType.UPDATED]: 'updated ticket details',
+    [TicketEventType.ASSIGNED]: 'assigned this ticket',
+    [TicketEventType.TIME_LOGGED]: 'logged time',
+    [TicketEventType.DELETED]: 'deleted this ticket',
+};
+
 const TicketDetail = ({ ticket, onClose, onUpdated, onDeleted }: TicketDetailProps) => {
     const [logMinutes, setLogMinutes] = useState('');
     const [showLogTime, setShowLogTime] = useState(false);
     const [error, setError] = useState('');
     const [showTransitionModal, setShowTransitionModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [events, setEvents] = useState<TicketEvent[]>([]);
+    const [eventsLoading, setEventsLoading] = useState(true);
+    const [eventsError, setEventsError] = useState('');
+
+    const loadEvents = useCallback(async () => {
+        setEventsLoading(true);
+        setEventsError('');
+        try {
+            const data = await ticketsService.getEvents(ticket.id);
+            setEvents(data);
+        } catch {
+            setEventsError('Failed to load activity.');
+        } finally {
+            setEventsLoading(false);
+        }
+    }, [ticket.id]);
+
+    useEffect(() => {
+        loadEvents();
+    }, [loadEvents]);
 
     const handleTransition = async (action: string, comment: string) => {
         const updated = await ticketsService.transition(ticket.id, { action, comment });
         onUpdated(updated);
+        await loadEvents();
     };
 
     const handleDelete = async (reason: string) => {
@@ -40,6 +80,7 @@ const TicketDetail = ({ ticket, onClose, onUpdated, onDeleted }: TicketDetailPro
             onUpdated(updated);
             setLogMinutes('');
             setShowLogTime(false);
+            await loadEvents();
         } catch {
             setError('Failed to log time.');
         }
@@ -49,6 +90,7 @@ const TicketDetail = ({ ticket, onClose, onUpdated, onDeleted }: TicketDetailPro
         try {
             const updated = await ticketsService.assignToMe(ticket.id);
             onUpdated(updated);
+            await loadEvents();
         } catch {
             setError('Failed to assign ticket.');
         }
@@ -59,6 +101,11 @@ const TicketDetail = ({ ticket, onClose, onUpdated, onDeleted }: TicketDetailPro
         const h = Math.floor(minutes / 60);
         const m = minutes % 60;
         return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    };
+
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     const fieldLabel: React.CSSProperties = {
@@ -122,24 +169,41 @@ const TicketDetail = ({ ticket, onClose, onUpdated, onDeleted }: TicketDetailPro
                                 </div>
                             </div>
 
-                            {/* Activity */}
+                            {/* Activity — full event history */}
                             <div>
                                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>
                                     Activity
                                 </div>
-                                {ticket.statusComment && (
-                                    <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                                        <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 600, color: 'white', flexShrink: 0 }}>
-                                            {ticket.reporter?.username?.slice(0, 2).toUpperCase() || 'U'}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
-                                                <strong style={{ color: 'var(--text-secondary)' }}>{ticket.reporter?.username}</strong> · last status change
+                                {eventsLoading ? (
+                                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Loading activity...</div>
+                                ) : eventsError ? (
+                                    <div style={{ fontSize: 12, color: 'var(--danger)' }}>{eventsError}</div>
+                                ) : events.length === 0 ? (
+                                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>No activity yet.</div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        {events.map((event) => (
+                                            <div key={event.id} style={{ display: 'flex', gap: 8 }}>
+                                                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flexShrink: 0 }}>
+                                                    {EVENT_ICON[event.eventType]}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>
+                                                        <strong style={{ color: 'var(--text-secondary)' }}>{event.userUsername}</strong>
+                                                        {' '}{EVENT_LABEL[event.eventType]}
+                                                        {event.fromStatus && event.toStatus && (
+                                                            <span> · <span style={{ color: 'var(--text-primary)' }}>{event.fromStatus}</span> → <span style={{ color: 'var(--accent)' }}>{event.toStatus}</span></span>
+                                                        )}
+                                                        <span style={{ marginLeft: 6 }}>{formatDate(event.createdAt)}</span>
+                                                    </div>
+                                                    {event.comment && (
+                                                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 4, padding: '6px 10px', marginTop: 2 }}>
+                                                            {event.comment}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 4, padding: '6px 10px' }}>
-                                                {ticket.statusComment}
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>

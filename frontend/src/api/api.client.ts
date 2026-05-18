@@ -31,9 +31,9 @@ apiClient.interceptors.response.use(
                 await refreshPromise;
                 return apiClient(originalRequest);
             } catch {
-                // Refresh failed, so we will have a clear user data and redirect to login
                 refreshPromise = null;
-                window.location.href = '/#/login';
+                // Dispatch event so AuthProvider can handle navigation via React Router
+                window.dispatchEvent(new CustomEvent('auth:unauthorized'));
             }
         }
         return Promise.reject(error);

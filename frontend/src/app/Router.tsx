@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '../shared/constants/routes.constants';
 import { useAuth } from './providers/AuthProvider';
 import LoginPage from '../pages/LoginPage';
@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const Router = () => {
     return (
-        <BrowserRouter>
+        <HashRouter>
             <Routes>
                 <Route path={ROUTES.LOGIN} element={<LoginPage />} />
                 <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
@@ -45,7 +45,7 @@ const Router = () => {
                 />
                 <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
             </Routes>
-        </BrowserRouter>
+        </HashRouter>
     );
 };
 

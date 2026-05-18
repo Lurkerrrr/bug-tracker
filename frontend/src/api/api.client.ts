@@ -33,7 +33,7 @@ apiClient.interceptors.response.use(
             } catch {
                 // Refresh failed, so we will have a clear user data and redirect to login
                 refreshPromise = null;
-                window.location.href = '/login';
+                window.location.href = '/#/login';
             }
         }
         return Promise.reject(error);

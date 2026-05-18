@@ -1,10 +1,11 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import type { User } from '../../features/auth/types/auth.types';
 import { authService } from '../../features/auth/services/auth.service';
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
+    isLoading: boolean;
     login: (user: User) => void;
     logout: () => void;
 }
@@ -15,30 +16,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Verify session with backend on every app load
     useEffect(() => {
         authService.me()
             .then((user) => setUser(user))
-            .catch(() => {
-                setUser(null);
-            })
+            .catch(() => setUser(null))
             .finally(() => setLoading(false));
     }, []);
 
-    const login = (user: User) => {
-        setUser(user);
-    };
+    useEffect(() => {
+        const handleUnauthorized = () => {
+            setUser(null);
+            setLoading(false);
+        };
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    }, []);
 
-    const logout = async () => {
+    const login = useCallback((user: User) => setUser(user), []);
+
+    const logout = useCallback(async () => {
         await authService.logout();
         setUser(null);
-    };
+    }, []);
 
-    // Prevent ProtectedRoute from redirecting before session is verified
-    if (loading) return null;
+    const value = useMemo(() => ({
+        user,
+        isAuthenticated: !!user,
+        isLoading: loading,
+        login,
+        logout,
+    }), [user, loading, login, logout]);
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

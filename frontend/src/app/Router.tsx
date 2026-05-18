@@ -7,18 +7,26 @@ import BoardPage from '../pages/BoardPage';
 import TicketPage from '../pages/TicketPage';
 import ComingSoonPage from '../pages/ComingSoonPage';
 
-// Protects routes that require authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
+    console.log('ProtectedRoute:', { isAuthenticated, isLoading });
+    if (isLoading) return null;
     return isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.LOGIN} replace />;
+};
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    const { isAuthenticated, isLoading } = useAuth();
+    console.log('PublicRoute:', { isAuthenticated, isLoading });
+    if (isLoading) return null;
+    return !isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.BOARD} replace />;
 };
 
 const Router = () => {
     return (
         <HashRouter>
             <Routes>
-                <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-                <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+                <Route path={ROUTES.LOGIN} element={<PublicRoute><LoginPage /></PublicRoute>} />
+                <Route path={ROUTES.REGISTER} element={<PublicRoute><RegisterPage /></PublicRoute>} />
                 <Route
                     path={ROUTES.BOARD}
                     element={
@@ -48,5 +56,7 @@ const Router = () => {
         </HashRouter>
     );
 };
+
+
 
 export default Router;

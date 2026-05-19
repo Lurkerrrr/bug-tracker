@@ -1,19 +1,44 @@
+version: "3.9"
+
 services:
   db:
-    image: postgres:17
+    image: postgres:15-alpine
+    container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - postgres_data_docker:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  adminer:
-    image: adminer
+  backend:
+    build: ./backend
+    container_name: nest_backend
     restart: always
     ports:
-      - "8080:8080"
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
 
 volumes:
-  db_data:
+  postgres_data_docker:

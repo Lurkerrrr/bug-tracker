@@ -9,14 +9,12 @@ import ComingSoonPage from '../pages/ComingSoonPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isLoading } = useAuth();
-    console.log('ProtectedRoute:', { isAuthenticated, isLoading });
     if (isLoading) return null;
     return isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.LOGIN} replace />;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isLoading } = useAuth();
-    console.log('PublicRoute:', { isAuthenticated, isLoading });
     if (isLoading) return null;
     return !isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.BOARD} replace />;
 };

@@ -6,11 +6,9 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    // Required for httpOnly cookies to be sent with requests
     withCredentials: true,
 });
 
-// Shared refresh promise, prevents concurrent 401s from firing multiple refresh calls
 let refreshPromise: Promise<void> | null = null;
 
 apiClient.interceptors.response.use(
@@ -18,11 +16,17 @@ apiClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // The refresh endpoint must never be retried by the interceptor,
+        // otherwise a failed refresh deadlocks itself.
+        if (originalRequest?.url?.includes('/auth/refresh')) {
+            refreshPromise = null;
+            return Promise.reject(error);
+        }
+
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                // If a refresh is already in flight, wait for it instead of firing a new one
                 if (!refreshPromise) {
                     refreshPromise = apiClient.post('/auth/refresh').then(() => {
                         refreshPromise = null;
@@ -32,7 +36,6 @@ apiClient.interceptors.response.use(
                 return apiClient(originalRequest);
             } catch {
                 refreshPromise = null;
-                // Dispatch event so AuthProvider can handle navigation via React Router
                 window.dispatchEvent(new CustomEvent('auth:unauthorized'));
             }
         }

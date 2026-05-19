@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useTheme } from '../../../app/providers/ThemeProvider';
 import Button from '../ui/Button';
+import ThemeToggle from '../ui/ThemeToggle';
 
 interface TopbarProps {
     onSearch?: (query: string) => void;
@@ -8,7 +8,6 @@ interface TopbarProps {
 }
 
 const Topbar = ({ onSearch, onCreateTicket }: TopbarProps) => {
-    const { theme, toggleTheme } = useTheme();
     const [search, setSearch] = useState('');
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,21 +56,7 @@ const Topbar = ({ onSearch, onCreateTicket }: TopbarProps) => {
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
                 {/* Theme toggle */}
-                <button
-                    onClick={toggleTheme}
-                    title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                    style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 4,
-                        padding: '4px 8px',
-                        color: 'var(--text-secondary)',
-                        fontSize: 16,
-                        cursor: 'pointer',
-                    }}
-                >
-                    {theme === 'light' ? '🌙' : '☀️'}
-                </button>
+                <ThemeToggle />
 
                 <Button variant="primary" onClick={onCreateTicket}>
                     + Create

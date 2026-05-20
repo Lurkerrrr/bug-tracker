@@ -6,6 +6,7 @@ import RegisterPage from '../pages/RegisterPage';
 import BoardPage from '../pages/BoardPage';
 import TicketPage from '../pages/TicketPage';
 import ComingSoonPage from '../pages/ComingSoonPage';
+import SettingsPage from '../pages/SettingsPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -46,6 +47,14 @@ const Router = () => {
                     element={
                         <ProtectedRoute>
                             <ComingSoonPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path={ROUTES.SETTINGS}
+                    element={
+                        <ProtectedRoute>
+                            <SettingsPage />
                         </ProtectedRoute>
                     }
                 />

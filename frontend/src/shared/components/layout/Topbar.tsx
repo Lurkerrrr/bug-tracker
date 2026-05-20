@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useTheme } from '../../../app/providers/ThemeProvider';
 import Button from '../ui/Button';
+import ThemeToggle from '../ui/ThemeToggle';
 
 interface TopbarProps {
     onSearch?: (query: string) => void;
@@ -8,7 +8,6 @@ interface TopbarProps {
 }
 
 const Topbar = ({ onSearch, onCreateTicket }: TopbarProps) => {
-    const { theme, toggleTheme } = useTheme();
     const [search, setSearch] = useState('');
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,50 +27,68 @@ const Topbar = ({ onSearch, onCreateTicket }: TopbarProps) => {
             flexShrink: 0,
         }}>
             {/* Search */}
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                borderRadius: 4,
-                padding: '4px 10px',
-                flex: 1,
-                maxWidth: 280,
-            }}>
-                <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>🔍</span>
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    background: 'var(--bg-primary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 4,
+                    padding: '6px 12px',
+                    flex: 1,
+                    maxWidth: 360,
+                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+                }}
+                onFocusCapture={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.boxShadow = '0 0 0 2px var(--accent-bg)';
+                }}
+                onBlurCapture={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.boxShadow = 'none';
+                }}
+            >
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}
+                    aria-hidden="true"
+                >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                </svg>
                 <input
                     value={search}
                     onChange={handleSearch}
-                    placeholder="Search tickets..."
+                    placeholder="Find a ticket..."
+                    aria-label="Search tickets"
                     style={{
                         border: 'none',
                         background: 'transparent',
                         outline: 'none',
+                        boxShadow: 'none',
                         fontSize: 13,
                         color: 'var(--text-primary)',
                         width: '100%',
+                        padding: 0,
+                    }}
+                    onFocus={(e) => {
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.borderColor = 'transparent';
                     }}
                 />
             </div>
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
                 {/* Theme toggle */}
-                <button
-                    onClick={toggleTheme}
-                    title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                    style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 4,
-                        padding: '4px 8px',
-                        color: 'var(--text-secondary)',
-                        fontSize: 16,
-                        cursor: 'pointer',
-                    }}
-                >
-                    {theme === 'light' ? '🌙' : '☀️'}
-                </button>
+                <ThemeToggle />
 
                 <Button variant="primary" onClick={onCreateTicket}>
                     + Create

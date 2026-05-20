@@ -4,4 +4,5 @@ export const ROUTES = {
     BOARD: '/board',
     TICKET: '/board/ticket/:id',
     COMING_SOON: '/coming-soon',
+    SETTINGS: '/settings',
 } as const;

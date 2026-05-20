@@ -152,23 +152,60 @@ const Sidebar = () => {
             </div>
 
             {/* Collapse toggle at very bottom */}
-            <div
+            <button
                 onClick={() => setCollapsed(!collapsed)}
+                title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-expanded={!collapsed}
                 style={{
-                    padding: '8px 12px',
+                    padding: '10px 12px',
                     cursor: 'pointer',
                     color: 'var(--text-tertiary)',
-                    fontSize: 12,
+                    fontSize: 13,
                     borderTop: '1px solid var(--border)',
+                    borderLeft: 'none',
+                    borderRight: 'none',
+                    borderBottom: 'none',
+                    background: 'transparent',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: collapsed ? 'center' : 'flex-start',
-                    gap: 6,
+                    gap: 10,
+                    transition: 'background-color 0.15s ease, color 0.15s ease',
+                    width: '100%',
+                    textAlign: 'left',
+                    fontFamily: 'inherit',
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-tertiary)';
                 }}
             >
-                <span>{collapsed ? '→' : '←'}</span>
-                {!collapsed && <span>Collapse</span>}
-            </div>
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                        flexShrink: 0,
+                        transform: collapsed ? 'scaleX(-1)' : 'none',
+                        transition: 'transform 0.2s ease',
+                    }}
+                    aria-hidden="true"
+                >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                </svg>
+                {!collapsed && <span>Toggle sidebar</span>}
+            </button>
         </div>
     );
 };

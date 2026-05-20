@@ -11,4 +11,6 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "yarn build && yarn migration:run && node dist/main.js"]
+RUN chmod +x docker-entrypoint.sh
+
+CMD ["./docker-entrypoint.sh"]

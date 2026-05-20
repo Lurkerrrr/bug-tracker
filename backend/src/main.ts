@@ -26,7 +26,11 @@ async function bootstrap() {
           scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:'],
-          connectSrc: ["'self'"],
+          connectSrc: [
+            "'self'",
+            'http://localhost:3000',
+            'http://localhost:5000',
+          ],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           frameAncestors: ["'none'"],
@@ -37,7 +41,12 @@ async function bootstrap() {
 
   // CORS for Electron desktop client
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'http://localhost:3000',
+      'http://localhost:5000',
+    ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -70,7 +79,9 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger docs available at: http://localhost:${port}/api/v1/docs`);
+  console.log(
+    `Swagger docs available at: http://localhost:${port}/api/v1/docs`,
+  );
 }
 
 bootstrap();

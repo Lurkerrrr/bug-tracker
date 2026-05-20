@@ -20,7 +20,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-  ) { }
+  ) {}
 
   async register(dto: RegisterDto) {
     const user = await this.usersService.create({
@@ -29,7 +29,9 @@ export class AuthService {
       password: dto.password,
     });
 
-    this.logger.log(`REGISTER_SUCCESS | username=${user.username} | role=${user.role}`);
+    this.logger.log(
+      `REGISTER_SUCCESS | username=${user.username} | role=${user.role}`,
+    );
 
     const { password, ...result } = user;
     return result;
@@ -38,19 +40,29 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.usersService.findOne(dto.username);
     if (!user) {
-      this.logger.warn(`LOGIN_FAILED | username=${dto.username} | reason=user_not_found`);
+      this.logger.warn(
+        `LOGIN_FAILED | username=${dto.username} | reason=user_not_found`,
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const passwordMatch = await bcrypt.compare(dto.password, user.password);
     if (!passwordMatch) {
-      this.logger.warn(`LOGIN_FAILED | username=${dto.username} | reason=invalid_password`);
+      this.logger.warn(
+        `LOGIN_FAILED | username=${dto.username} | reason=invalid_password`,
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    this.logger.log(`LOGIN_SUCCESS | username=${user.username} | role=${user.role} | id=${user.id}`);
+    this.logger.log(
+      `LOGIN_SUCCESS | username=${user.username} | role=${user.role} | id=${user.id}`,
+    );
 
-    const accessToken = this.generateAccessToken(user.id, user.username, user.role);
+    const accessToken = this.generateAccessToken(
+      user.id,
+      user.username,
+      user.role,
+    );
     const refreshToken = await this.generateRefreshToken(user.id);
 
     return {
@@ -87,10 +99,16 @@ export class AuthService {
     }
 
     await this.refreshTokenRepository.delete(stored.id);
-    const accessToken = this.generateAccessToken(user.id, user.username, user.role);
+    const accessToken = this.generateAccessToken(
+      user.id,
+      user.username,
+      user.role,
+    );
     const refreshToken = await this.generateRefreshToken(user.id);
 
-    this.logger.log(`TOKEN_REFRESHED | username=${user.username} | id=${user.id}`);
+    this.logger.log(
+      `TOKEN_REFRESHED | username=${user.username} | id=${user.id}`,
+    );
 
     return { accessToken, refreshToken };
   }
@@ -106,7 +124,11 @@ export class AuthService {
     return this.usersService.findById(userId);
   }
 
-  private generateAccessToken(userId: string, username: string, role: string): string {
+  private generateAccessToken(
+    userId: string,
+    username: string,
+    role: string,
+  ): string {
     return this.jwtService.sign({
       sub: userId,
       username,
@@ -119,7 +141,8 @@ export class AuthService {
     const rawToken = crypto.randomBytes(64).toString('hex');
     const tokenHash = this.hashToken(rawToken);
 
-    const expirationDays = this.configService.get<string>('app.jwt.expirationExchange') || '7d';
+    const expirationDays =
+      this.configService.get<string>('app.jwt.expirationExchange') || '7d';
     const days = parseInt(expirationDays.replace('d', ''), 10) || 7;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + days);

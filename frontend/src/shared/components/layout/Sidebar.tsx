@@ -76,7 +76,7 @@ const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Settings',
-        path: ROUTES.COMING_SOON,
+        path: ROUTES.SETTINGS,
         icon: (
             <svg {...iconProps}>
                 <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
@@ -191,8 +191,10 @@ const Sidebar = () => {
                 {NAV_ITEMS.map((item) => {
                     const isActive = item.path === ROUTES.BOARD
                         ? location.pathname === ROUTES.BOARD
-                        : location.pathname === ROUTES.COMING_SOON &&
-                        (location.state as { from?: string })?.from === '/' + item.label.toLowerCase();
+                        : item.path === ROUTES.SETTINGS
+                            ? location.pathname === ROUTES.SETTINGS
+                            : location.pathname === ROUTES.COMING_SOON &&
+                            (location.state as { from?: string })?.from === '/' + item.label.toLowerCase();
                     return (
                         <div
                             key={item.label}

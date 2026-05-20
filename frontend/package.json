@@ -10,8 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "electron:dev": "cross-env NODE_ENV=development electron .",
-    "electron:build": "tsc -b && vite build && electron-builder",
-    "electron:preview": "electron ."
+    "electron:build": "npm run build:electron && vite build && electron-builder",
+    "electron:preview": "electron .",
+    "build:electron": "tsc -p tsconfig.electron.json"
   },
   "build": {
     "appId": "com.bugtracker.app",

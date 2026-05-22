@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = !app.isPackaged;
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -15,7 +15,7 @@ function createWindow() {
         minHeight: 600,
         title: 'Bug Tracker',
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'preload.mjs'),
             contextIsolation: true,
             nodeIntegration: false,
         },
@@ -26,13 +26,12 @@ function createWindow() {
         return { action: 'deny' };
     });
 
+    mainWindow.loadURL('http://localhost:3000');
+
     if (isDev) {
-        mainWindow.loadURL('http://localhost:5173');
         mainWindow.webContents.on('did-finish-load', () => {
             mainWindow?.webContents.openDevTools();
         });
-    } else {
-        mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
     }
 }
 

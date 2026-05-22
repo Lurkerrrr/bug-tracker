@@ -4,6 +4,7 @@ import { useAuth } from './providers/AuthProvider';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import BoardPage from '../pages/BoardPage';
+import BacklogPage from '../pages/BacklogPage';
 import TicketPage from '../pages/TicketPage';
 import ComingSoonPage from '../pages/ComingSoonPage';
 import SettingsPage from '../pages/SettingsPage';
@@ -31,6 +32,14 @@ const Router = () => {
                     element={
                         <ProtectedRoute>
                             <BoardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path={ROUTES.BACKLOG}
+                    element={
+                        <ProtectedRoute>
+                            <BacklogPage />
                         </ProtectedRoute>
                     }
                 />

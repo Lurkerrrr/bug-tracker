@@ -36,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Backlog',
-        path: ROUTES.COMING_SOON,
+        path: ROUTES.BACKLOG,
         icon: (
             <svg {...iconProps}>
                 <rect width="7" height="7" x="3" y="3" rx="1" />
@@ -189,12 +189,10 @@ const Sidebar = () => {
             {/* Nav */}
             <nav style={{ flex: 1, padding: '8px 0', overflow: 'hidden' }}>
                 {NAV_ITEMS.map((item) => {
-                    const isActive = item.path === ROUTES.BOARD
-                        ? location.pathname === ROUTES.BOARD
-                        : item.path === ROUTES.SETTINGS
-                            ? location.pathname === ROUTES.SETTINGS
-                            : location.pathname === ROUTES.COMING_SOON &&
-                            (location.state as { from?: string })?.from === '/' + item.label.toLowerCase();
+                    const isActive = item.path === ROUTES.COMING_SOON
+                        ? location.pathname === ROUTES.COMING_SOON &&
+                        (location.state as { from?: string })?.from === '/' + item.label.toLowerCase()
+                        : location.pathname === item.path;
                     return (
                         <div
                             key={item.label}

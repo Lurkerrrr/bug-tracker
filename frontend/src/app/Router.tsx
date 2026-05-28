@@ -5,6 +5,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import BoardPage from '../pages/BoardPage';
 import BacklogPage from '../pages/BacklogPage';
+import TeamPage from '../pages/TeamPage';
 import TicketPage from '../pages/TicketPage';
 import ComingSoonPage from '../pages/ComingSoonPage';
 import SettingsPage from '../pages/SettingsPage';
@@ -40,6 +41,14 @@ const Router = () => {
                     element={
                         <ProtectedRoute>
                             <BacklogPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path={ROUTES.TEAM}
+                    element={
+                        <ProtectedRoute>
+                            <TeamPage />
                         </ProtectedRoute>
                     }
                 />

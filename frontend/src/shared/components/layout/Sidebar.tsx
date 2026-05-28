@@ -50,7 +50,7 @@ const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Reports',
-        path: ROUTES.COMING_SOON,
+        path: ROUTES.REPORTS,
         icon: (
             <svg {...iconProps}>
                 <path d="M12 16v5" />

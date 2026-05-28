@@ -6,4 +6,9 @@ export const usersService = {
         const response = await apiClient.get<User[]>('/users');
         return response.data;
     },
+
+    async getTeam(): Promise<User[]> {
+        const response = await apiClient.get<User[]>('/users/team');
+        return response.data;
+    },
 };

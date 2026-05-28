@@ -45,4 +45,10 @@ export class UsersService {
             select: ['id', 'username', 'email', 'role', 'createdAt'],
         });
     }
+
+    async findAllForTeam(): Promise<User[]> {
+        return this.usersRepository.find({
+            select: ['id', 'username', 'email', 'role'],
+        });
+    }
 }

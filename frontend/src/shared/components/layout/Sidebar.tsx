@@ -50,7 +50,7 @@ const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Reports',
-        path: ROUTES.COMING_SOON,
+        path: ROUTES.REPORTS,
         icon: (
             <svg {...iconProps}>
                 <path d="M12 16v5" />
@@ -64,7 +64,7 @@ const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Team',
-        path: ROUTES.COMING_SOON,
+        path: ROUTES.TEAM,
         icon: (
             <svg {...iconProps}>
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />

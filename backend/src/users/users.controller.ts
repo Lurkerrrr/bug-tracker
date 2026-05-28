@@ -18,4 +18,10 @@ export class UsersController {
     findAll() {
         return this.usersService.findAll();
     }
+
+    @Get('team')
+    @ApiOperation({ summary: 'Get team members (id, username, email, role) for any authenticated user' })
+    findAllForTeam() {
+        return this.usersService.findAllForTeam();
+    }
 }

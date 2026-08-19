@@ -37,8 +37,8 @@ The canonical way to run the project is via Docker. Everything - database, backe
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/UladzislauSopat/project.git
-cd project
+git clone https://github.com/Lurkerrrr/bug-tracker.git
+cd bug-tracker
 ```
 
 ### 2. Configure backend environment
